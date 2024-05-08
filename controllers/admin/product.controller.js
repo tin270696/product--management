@@ -29,11 +29,23 @@ module.exports.index = async (req, res) => {
     const objectPagination = paginationHelper(req, countProduct);
     // End Pagination
 
+    // Sort
+    const sort = {};
+    if(req.query.sortKey && req.query.sortValue){
+        const sortKey = req.query.sortKey;
+        const sortValue = req.query.sortValue;
+        sort[sortKey] = sortValue;
+    }
+    else {
+        sort.position = "desc";
+    }
+    // End Sort
+
     const products = await Product
         .find(find)
         .limit(objectPagination.limitItems)
         .skip(objectPagination.skip)
-        .sort({ position: "desc" });
+        .sort(sort);
 
     res.render("admin/pages/products/index", {
         pageTitle: "Trang quản lý sản phẩm",
