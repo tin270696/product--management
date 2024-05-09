@@ -218,7 +218,7 @@ if(sort){
     url.searchParams.set("sortValue", sortValue);
 
     window.location.href = url.href;
-  })
+  });
   
   const selectedSortKey = url.searchParams.get("sortKey");
   const selectedSortValue = url.searchParams.get("sortValue");
