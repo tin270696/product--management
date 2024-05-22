@@ -6,7 +6,7 @@ const Role = require("../../models/role.model");
 const generateHelper = require("../../helpers/generate.helper");
 const systemConfig = require("../../config/system");
 
-// [GET] /admin/account/index/
+// [GET] /admin/accounts/index/
 module.exports.index = async (req, res) =>  {
     const find = {
         deleted: false
@@ -29,7 +29,7 @@ module.exports.index = async (req, res) =>  {
     })
 }
 
-// [GET] /admin/account/create/
+// [GET] /admin/accounts/create/
 module.exports.create = async (req, res) => {
     const find = {
         deleted: false
@@ -44,7 +44,7 @@ module.exports.create = async (req, res) => {
     })
 }
 
-// [POST] /admin/account/create/
+// [POST] /admin/accounts/create/
 module.exports.createPost = async (req, res) => {
     req.body.password = md5(req.body.password);
     req.body.token = generateHelper.generateRandomString(30);
@@ -53,4 +53,49 @@ module.exports.createPost = async (req, res) => {
     await account.save();
 
     res.redirect(`/${systemConfig.prefixAdmin}/accounts`);
+}
+
+// [GET] /admin/accounts/edit/:id/
+module.exports.edit = async (req, res) => {
+    try {
+        const find = {
+            _id: req.params.id,
+            deleted: false
+        }
+    
+        const data = await Account.findOne(find);
+        const roles = await Role.find({
+            deleted: false
+        });
+    
+        res.render("admin/pages/accounts/edit", {
+            pageTitle: "Chỉnh sửa tài khoản",
+            roles: roles,
+            data: data
+        });
+    } catch (error) {
+        res.redirect(`/${systemConfig.prefixAdmin}/accounts`);
+    }
+}
+
+// [PATCH] /admin/accounts/edit/:id/
+module.exports.editPatch = async (req, res) => {
+    try {
+        if(req.body.password){
+            req.body.password = md5(req.body.password);
+        }
+        else {
+            delete req.body.password;
+        }
+
+        await Account.updateOne({
+            _id: req.params.id,
+            deleted: false
+        }, req.body);
+
+        req.flash("success", "Cập nhật thông tin thành công!");
+        res.redirect("back");
+    } catch (error) {
+        res.redirect(`/${systemConfig.prefixAdmin}/accounts`);
+    }
 }
